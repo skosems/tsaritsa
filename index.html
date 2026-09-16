@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Snezhnaya Mereona Elianna — Grimoire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg: #05070c;
+  --panel: #0a0d16;
+  --panel-2: #0e1220;
+  --gold: #c9ad78;
+  --gold-bright: #ecd9ab;
+  --gold-deep: #7c6438;
+  --teal: #8fe0e8;
+  --teal-dim: #23494d;
+  --teal-glow: rgba(143,224,232,0.35);
+  --ink: #eef1f5;
+  --ink-dim: #9aa8b5;
+  --line: rgba(201,173,120,0.28);
+  --line-teal: rgba(143,224,232,0.3);
+  --radius: 16px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font-family:'EB Garamond', Georgia, serif; overflow-x:hidden;}
+h1,h2,h3,h4{font-family:'Cinzel',serif; letter-spacing:0.03em; color:var(--gold-bright); font-weight:600; margin:0;}
+.serif-i{font-family:'Cormorant Garamond', serif; font-style:italic;}
+a{color:var(--teal); text-decoration:none;}
+::selection{background:var(--teal-dim); color:#fff;}
+
+#snowbg, #burstfx{position:fixed; inset:0; z-index:2; pointer-events:none;}
+#burstfx{z-index:90;}
+
+/* ============ COVER ============ */
+#cover{
+  position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center;
+  background:#000; transition:opacity 1s ease, visibility 1s ease;
+}
+#cover.hidden{opacity:0; visibility:hidden; pointer-events:none;}
+#cover .cover-bg{
+  position:absolute; inset:0; background-size:cover; background-position:center;
+  filter:saturate(0.9) brightness(0.55);
+}
+#cover .cover-veil{position:absolute; inset:0; background:radial-gradient(ellipse at 50% 40%, rgba(5,7,12,0.35), rgba(5,7,12,0.92) 75%);}
+#cover .cover-content{position:relative; z-index:2; text-align:center; padding:40px;}
+#cover .emblem{width:120px; height:120px; margin-bottom:18px; filter:drop-shadow(0 0 24px rgba(201,173,120,0.55));}
+#cover h1{font-size:2.6rem; letter-spacing:0.16em; margin-bottom:6px;
+  text-shadow:0 0 30px rgba(143,224,232,0.35);}
+#cover .cover-sub{color:var(--teal); font-family:'Cormorant Garamond'; font-style:italic; font-size:1.15rem;
+  letter-spacing:0.05em; margin-bottom:34px;}
+#enter-btn{
+  position:relative; background:transparent; border:1px solid var(--gold); color:var(--gold-bright);
+  font-family:'Cinzel'; letter-spacing:0.32em; font-size:0.85rem; padding:16px 46px; cursor:pointer;
+  transition:all .35s ease; text-transform:uppercase;
+}
+#enter-btn:hover{background:rgba(201,173,120,0.12); box-shadow:0 0 34px rgba(201,173,120,0.4); color:#fff;}
+#cover .cover-hint{margin-top:16px; font-size:0.72rem; color:var(--ink-dim); letter-spacing:0.08em;}
+
+/* ============ APP SHELL ============ */
+#app{position:relative; z-index:1; min-height:100vh;}
+
+#tabnav{
+  position:fixed; top:0; left:0; bottom:0; width:78px; z-index:50;
+  background:linear-gradient(180deg, var(--panel), #060810); border-right:1px solid var(--line);
+  display:flex; flex-direction:column; align-items:center; padding:22px 0; gap:6px;
+}
+#tabnav .tab-emblem{width:38px; height:38px; margin-bottom:18px; filter:drop-shadow(0 0 8px rgba(201,173,120,0.4));}
+.tab-btn{
+  width:52px; height:52px; border-radius:50%; border:1px solid var(--line); background:rgba(255,255,255,0.02);
+  color:var(--ink-dim); display:flex; align-items:center; justify-content:center; font-size:1.15rem;
+  cursor:pointer; position:relative; transition:all .25s ease; flex-shrink:0;
+}
+.tab-btn:hover{border-color:var(--teal); color:var(--teal);}
+.tab-btn.active{border-color:var(--gold); color:var(--gold-bright); background:rgba(201,173,120,0.12);
+  box-shadow:0 0 16px rgba(201,173,120,0.3);}
+.tab-btn .tab-tip{
+  position:absolute; left:64px; top:50%; transform:translateY(-50%); background:#10141f; border:1px solid var(--line);
+  padding:6px 12px; font-size:0.72rem; letter-spacing:0.06em; white-space:nowrap; color:var(--ink);
+  opacity:0; pointer-events:none; transition:opacity .2s ease; font-family:'Cinzel';
+}
+.tab-btn:hover .tab-tip{opacity:1;}
+
+#content{margin-left:78px; min-height:100vh; position:relative;}
+.page{display:none; min-height:100vh; position:relative;}
+.page.active{display:block; animation:pagein .55s ease;}
+@keyframes pagein{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+
+.hero{height:340px; position:relative; background-size:cover; background-position:center; overflow:hidden;}
+.hero::after{content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(5,7,12,0.1) 0%, rgba(5,7,12,0.65) 60%, var(--bg) 100%);}
+.hero-caption{position:absolute; bottom:22px; left:50%; transform:translateX(-50%); z-index:2; text-align:center;}
+.chapter-num{font-family:'Cinzel'; font-size:0.78rem; letter-spacing:0.4em; color:var(--teal);}
+.hero-caption h2{font-size:2.4rem; margin-top:6px;}
+.hero-caption .sub{font-family:'Cormorant Garamond'; font-style:italic; color:var(--ink-dim); font-size:1.05rem; margin-top:4px;}
+
+.wrap{max-width:980px; margin:0 auto; padding:44px 40px 100px;}
+
+.divider{display:flex; align-items:center; justify-content:center; gap:14px; margin:34px 0; color:var(--gold-deep);}
+.divider .ln{height:1px; flex:1; background:linear-gradient(90deg, transparent, var(--line), transparent);}
+.divider .gl{font-size:0.9rem; color:var(--teal);}
+
+/* fields (Identite) */
+.field-row{border:1px solid var(--line); border-radius:10px; margin-bottom:12px; overflow:hidden; background:var(--panel);}
+.field-head{display:flex; justify-content:space-between; align-items:center; padding:16px 20px; cursor:pointer; user-select:none;}
+.field-head .lab{font-family:'Cinzel'; font-size:0.95rem; color:var(--gold-bright); letter-spacing:0.04em;}
+.field-head .val{font-family:'Cormorant Garamond'; font-style:italic; color:var(--ink); font-size:1.05rem;}
+.field-head .val.empty{color:var(--teal); opacity:0.85;}
+.field-chevron{color:var(--gold-deep); transition:transform .3s ease; font-size:0.8rem;}
+.field-row.open .field-chevron{transform:rotate(180deg);}
+.field-body{max-height:0; overflow:hidden; transition:max-height .35s ease;}
+.field-row.open .field-body{max-height:200px;}
+.field-body-inner{padding:0 20px 18px; color:var(--ink-dim); font-size:0.92rem; font-style:italic;}
+
+.id-layout{display:flex; gap:34px; flex-wrap:wrap;}
+.id-portrait{flex:0 0 260px;}
+.id-portrait img{width:100%; border-radius:12px; border:1px solid var(--line-teal); box-shadow:0 0 30px rgba(143,224,232,0.12);}
+.id-fields{flex:1; min-width:280px;}
+
+/* generic empty section */
+.empty-block{
+  border:1px dashed var(--line-teal); border-radius:var(--radius); padding:70px 40px; text-align:center;
+  background:rgba(143,224,232,0.03);
+}
+.empty-block .tag{
+  display:inline-block; font-family:'Cinzel'; letter-spacing:0.25em; font-size:0.78rem; color:var(--teal);
+  border:1px solid var(--line-teal); padding:6px 18px; border-radius:20px; margin-bottom:16px;
+}
+.empty-block p{color:var(--ink-dim); font-family:'Cormorant Garamond'; font-style:italic; font-size:1.15rem; margin:0;}
+.dropcap{font-family:'Cinzel'; font-size:3.4rem; color:var(--gold); float:left; line-height:0.8; margin-right:10px; margin-top:6px;}
+
+/* combat subsection cards */
+.combat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px;}
+.combat-card{border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; background:var(--panel); cursor:pointer;
+  transition:border-color .25s ease, transform .25s ease;}
+.combat-card:hover{border-color:var(--teal); transform:translateY(-3px);}
+.combat-card .cc-img{height:120px; background-size:cover; background-position:center; position:relative;}
+.combat-card .cc-img::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, transparent, rgba(10,13,22,0.9));}
+.combat-card .cc-icon{position:absolute; bottom:8px; left:14px; font-size:1.3rem; color:var(--teal); z-index:2;}
+.combat-card .cc-body{padding:14px 18px 18px;}
+.combat-card h4{font-size:1.05rem; color:var(--gold-bright); margin-bottom:6px;}
+.combat-card .cc-val{color:var(--teal); font-family:'Cormorant Garamond'; font-style:italic; font-size:0.92rem;}
+.combat-detail{max-height:0; overflow:hidden; transition:max-height .35s ease;}
+.combat-card.open .combat-detail{max-height:120px;}
+.combat-detail-inner{padding-top:10px; color:var(--ink-dim); font-size:0.85rem; font-style:italic; border-top:1px solid var(--line); margin-top:8px;}
+
+/* physique gallery */
+.gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px;}
+.gallery figure{margin:0; border-radius:10px; overflow:hidden; cursor:pointer; position:relative; border:1px solid var(--line);
+  transition:transform .25s ease, border-color .25s ease;}
+.gallery figure:hover{transform:scale(1.035); border-color:var(--teal);}
+.gallery img{width:100%; height:150px; object-fit:cover; display:block;}
+
+#lightbox{position:fixed; inset:0; background:rgba(3,4,7,0.94); z-index:200; display:none; align-items:center; justify-content:center; padding:40px;}
+#lightbox.show{display:flex;}
+#lightbox img{max-width:88vw; max-height:82vh; border:1px solid var(--line-teal); box-shadow:0 0 60px rgba(143,224,232,0.2);}
+#lightbox .lb-close{position:absolute; top:26px; right:34px; font-size:1.8rem; color:var(--ink); cursor:pointer; font-family:'Cinzel';}
+#lightbox .lb-nav{position:absolute; top:50%; transform:translateY(-50%); font-size:2rem; color:var(--teal); cursor:pointer; padding:20px; user-select:none;}
+#lightbox .lb-prev{left:10px;} #lightbox .lb-next{right:10px;}
+
+/* liens tree */
+.tree-wrap{display:flex; justify-content:center; gap:60px; flex-wrap:wrap; padding:40px 0;}
+.tree-col{text-align:center;}
+.tree-col h4{color:var(--teal); margin-bottom:18px; font-size:0.95rem; letter-spacing:0.1em;}
+.tree-node{
+  width:90px; height:90px; border-radius:50%; border:1px dashed var(--line-teal); display:flex; align-items:center;
+  justify-content:center; margin:0 auto 14px; color:var(--gold-deep); font-family:'Cinzel'; font-size:1.6rem;
+  cursor:pointer; transition:all .25s ease; position:relative;
+}
+.tree-node:hover{border-color:var(--teal); color:var(--teal); box-shadow:0 0 20px rgba(143,224,232,0.2);}
+.tree-node .tt{position:absolute; bottom:-34px; left:50%; transform:translateX(-50%); font-size:0.68rem; color:var(--ink-dim);
+  opacity:0; transition:opacity .2s ease; white-space:nowrap; font-family:'Cormorant Garamond'; font-style:italic;}
+.tree-node:hover .tt{opacity:1;}
+
+/* sommaire grid */
+.chapters-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:22px; margin-top:20px;}
+.chapter-tile{
+  position:relative; height:220px; border-radius:var(--radius); overflow:hidden; cursor:pointer;
+  border:1px solid var(--line); background-size:cover; background-position:center;
+  transition:transform .3s ease, border-color .3s ease;
+}
+.chapter-tile:hover{transform:translateY(-6px) scale(1.015); border-color:var(--teal);}
+.chapter-tile::after{content:""; position:absolute; inset:0; background:linear-gradient(190deg, rgba(6,8,12,0.15), rgba(6,8,12,0.92));}
+.chapter-tile .ct-inner{position:absolute; bottom:0; left:0; right:0; z-index:2; padding:18px 20px;}
+.chapter-tile .ct-num{font-family:'Cinzel'; font-size:0.7rem; color:var(--teal); letter-spacing:0.3em;}
+.chapter-tile h3{font-size:1.4rem; margin-top:4px;}
+.chapter-tile .ct-sub{color:var(--ink-dim); font-size:0.78rem; font-family:'Cormorant Garamond'; font-style:italic; margin-top:2px;}
+
+.important-badge{
+  display:inline-block; margin-top:18px; font-family:'Cinzel'; font-size:0.68rem; letter-spacing:0.15em;
+  color:var(--gold-bright); border:1px solid var(--gold-deep); padding:5px 14px; border-radius:20px; background:rgba(201,173,120,0.08);
+}
+
+.prevnext{display:flex; justify-content:space-between; margin-top:50px; padding-top:20px; border-top:1px solid var(--line);}
+.pn-btn{color:var(--ink-dim); font-family:'Cinzel'; font-size:0.78rem; letter-spacing:0.12em; cursor:pointer; transition:color .2s ease;
+  display:flex; align-items:center; gap:8px;}
+.pn-btn:hover{color:var(--teal);}
+.pn-btn.home{margin:0 auto;}
+
+/* audio control */
+#audio-ctrl{
+  position:fixed; bottom:22px; right:26px; z-index:60; display:flex; align-items:center; gap:10px;
+  background:rgba(10,13,22,0.85); border:1px solid var(--line); border-radius:30px; padding:10px 18px 10px 10px;
+  backdrop-filter:blur(6px);
+}
+#audio-toggle{
+  width:38px; height:38px; border-radius:50%; border:1px solid var(--gold-deep); background:rgba(201,173,120,0.1);
+  color:var(--gold-bright); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.95rem;
+}
+#audio-ctrl .eq{display:flex; align-items:center; gap:2px; height:16px;}
+#audio-ctrl .eq span{width:3px; background:var(--teal); border-radius:1px; height:4px; transition:height .15s ease;}
+#audio-ctrl .track-label{font-size:0.68rem; color:var(--ink-dim); max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-family:'Cormorant Garamond'; font-style:italic;}
+
+#navtoggle{display:none; position:fixed; top:16px; left:16px; z-index:70; width:44px; height:44px; border-radius:50%;
+  background:var(--panel); border:1px solid var(--line); color:var(--gold); align-items:center; justify-content:center; cursor:pointer;}
+
+@media (max-width: 880px){
+  #tabnav{transform:translateX(-100%); transition:transform .3s ease; width:240px;}
+  #tabnav.open{transform:translateX(0);}
+  .tab-btn{width:100%; height:44px; border-radius:8px; flex-direction:row; justify-content:flex-start; padding-left:14px; gap:12px;}
+  .tab-btn .tab-tip{position:static; transform:none; opacity:1; background:none; border:none; padding:0; color:inherit; font-size:0.78rem;}
+  #content{margin-left:0;}
+  #navtoggle{display:flex;}
+  .wrap{padding:34px 20px 80px;}
+  .hero{height:220px;}
+  .hero-caption h2{font-size:1.7rem;}
+  .id-layout{flex-direction:column;}
+  #audio-ctrl .track-label{display:none;}
+}
+
+</style>
+</head>
+<body>
+
+<canvas id="snowbg"></canvas>
+<canvas id="burstfx"></canvas>
+
+<!-- ============ COVER ============ -->
+<div id="cover">
+  <div class="cover-bg" style="background-image:url('assets/img/tsarine/namecard_bg1.jpg')"></div>
+  <div class="cover-veil"></div>
+  <div class="cover-content">
+    <img class="emblem" src="assets/img/emblem.png" alt="Emblème de Snezhnaya"/>
+    <h1>SNEZHNAYA MEREONA ELIANNA</h1>
+    <div class="cover-sub">Fiche en construction &mdash; grimoire personnel</div>
+    <button id="enter-btn">Entrer</button>
+    <div class="cover-hint">un fragment de musique s'éveillera avec la porte</div>
+  </div>
+</div>
+
+<!-- ============ LIGHTBOX ============ -->
+<div id="lightbox">
+  <span class="lb-close">&times;</span>
+  <span class="lb-nav lb-prev">&#10094;</span>
+  <img id="lb-img" src="" alt=""/>
+  <span class="lb-nav lb-next">&#10095;</span>
+</div>
+
+<!-- ============ AUDIO CONTROL ============ -->
+<div id="audio-ctrl">
+  <button id="audio-toggle">&#9658;</button>
+  <div class="eq"><span style="animation:eqbar 0.6s infinite ease-in-out;"></span><span style="animation:eqbar 0.5s infinite ease-in-out;"></span><span style="animation:eqbar 0.7s infinite ease-in-out;"></span><span style="animation:eqbar 0.55s infinite ease-in-out;"></span></div>
+  <div class="track-label">I Loved You — Korolevskiy Theatre</div>
+</div>
+<audio id="theme-audio" src="assets/audio/theme.mp3" loop preload="auto"></audio>
+
+<button id="navtoggle">&#9776;</button>
+
+<div id="app">
+  <nav id="tabnav">
+    <img class="tab-emblem" src="assets/img/emblem.png" alt=""/>
+    <button class="tab-btn active" data-goto="sommaire"><span>&#9776;</span><span class="tab-tip">Sommaire</span></button>
+<button class="tab-btn" data-goto="identite"><span>❆</span><span class="tab-tip">I. Identité</span></button>
+<button class="tab-btn" data-goto="histoire"><span>✒</span><span class="tab-tip">II. Histoire</span></button>
+<button class="tab-btn" data-goto="mental"><span>☾</span><span class="tab-tip">III. Mental</span></button>
+<button class="tab-btn" data-goto="combat"><span>⚔</span><span class="tab-tip">IV. Combat</span></button>
+<button class="tab-btn" data-goto="physique"><span>👁</span><span class="tab-tip">V. Physique</span></button>
+<button class="tab-btn" data-goto="liens"><span>⛓</span><span class="tab-tip">VI. Liens</span></button>
+<button class="tab-btn" data-goto="role"><span>♛</span><span class="tab-tip">VII. Rôle & Réputation</span></button>
+  </nav>
+  <main id="content">
+    
+<section class="page active" id="page-sommaire">
+  <div class="hero" style="background-image:url('assets/img/tsarine/palace_distant.jpg')">
+    <div class="hero-caption">
+      <div class="chapter-num">GRIMOIRE PERSONNEL</div>
+      <h2>Snezhnaya Mereona Elianna</h2>
+      <div class="sub">Fiche officielle — en construction</div>
+    </div>
+  </div>
+  <div class="wrap">
+    <p class="serif-i" style="text-align:center;color:var(--ink-dim);font-size:1.1rem;max-width:640px;margin:0 auto 10px;">
+      Ce grimoire recense tout ce que l'on sait — et surtout, tout ce que l'on ignore encore — sur celle qui siège sur le trône de glace de Snezhnaya. Chaque chapitre s'ouvrira à mesure que son histoire s'écrira.
+    </p>
+    <div class="divider"><span class="ln"></span><span class="gl">❆</span><span class="ln"></span></div>
+    <div class="chapters-grid">
+      <div class="chapter-tile" data-goto="identite" style="background-image:url('assets/img/tsarine/veil_close1.jpg')">
+        <div class="ct-inner">
+          <div class="ct-num">CHAPITRE I</div>
+          <h3>❆ Identité</h3>
+          <div class="ct-sub">Qui est-elle réellement ?</div>
+        </div>
+      </div><div class="chapter-tile" data-goto="histoire" style="background-image:url('assets/img/tsarine/palace_glacier.jpg')">
+        <div class="ct-inner">
+          <div class="ct-num">CHAPITRE II</div>
+          <h3>✒ Histoire</h3>
+          <div class="ct-sub">Un passé encore scellé</div>
+        </div>
+      </div><div class="chapter-tile" data-goto="mental" style="background-image:url('assets/img/tsarine/eye_watch.jpg')">
+        <div class="ct-inner">
+          <div class="ct-num">CHAPITRE III</div>
+          <h3>☾ Mental</h3>
+          <div class="ct-sub">L'âme derrière le voile</div>
+        </div>
+      </div><div class="chapter-tile" data-goto="combat" style="background-image:url('assets/img/tsarine/blade_hand.jpg')">
+        <div class="ct-inner">
+          <div class="ct-num">CHAPITRE IV</div>
+          <h3>⚔ Combat</h3>
+          <div class="ct-sub">Le pouvoir de l'hiver</div>
+        </div>
+      </div><div class="chapter-tile" data-goto="physique" style="background-image:url('assets/img/tsarine/veil_close2.jpg')">
+        <div class="ct-inner">
+          <div class="ct-num">CHAPITRE V</div>
+          <h3>👁 Physique</h3>
+          <div class="ct-sub">Références visuelles</div>
+        </div>
+      </div><div class="chapter-tile" data-goto="liens" style="background-image:url('assets/img/tsarine/court_figures_gembattle.jpg')">
+        <div class="ct-inner">
+          <div class="ct-num">CHAPITRE VI</div>
+          <h3>⛓ Liens</h3>
+          <div class="ct-sub">OC & PNJ</div>
+        </div>
+      </div><div class="chapter-tile" data-goto="role" style="background-image:url('assets/img/tsarine/throne_heart.jpg')">
+        <div class="ct-inner">
+          <div class="ct-num">CHAPITRE VII</div>
+          <h3>♛ Rôle & Réputation</h3>
+          <div class="ct-sub">La Tsarine aux yeux du monde</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="page" id="page-identite">
+  <div class="hero" style="background-image:url('assets/img/tsarine/veil_close1.jpg')">
+      <div class="hero-caption">
+        <div class="chapter-num">CHAPITRE I</div>
+        <h2>Identité</h2>
+        <div class="sub">Qui est-elle réellement ?</div>
+      </div>
+    </div>
+  <div class="wrap">
+    <div class="id-layout">
+      <div class="id-portrait">
+        <img src="assets/img/tsarine/portrait_mentale.jpg" alt="Portrait de Mereona"/>
+      </div>
+      <div class="id-fields">
+        <div class="field-row">
+      <div class="field-head" data-toggle>
+        <span class="lab">Nom</span>
+        <span style="display:flex;align-items:center;gap:14px;"><span class="val">SNEZHNAYA</span><span class="field-chevron">&#9662;</span></span>
+      </div>
+      <div class="field-body"><div class="field-body-inner">Information confirmée.</div></div>
+    </div>
+        <div class="field-row">
+      <div class="field-head" data-toggle>
+        <span class="lab">Prénom</span>
+        <span style="display:flex;align-items:center;gap:14px;"><span class="val">Mereona Elianna</span><span class="field-chevron">&#9662;</span></span>
+      </div>
+      <div class="field-body"><div class="field-body-inner">Information confirmée.</div></div>
+    </div>
+        <div class="field-row">
+      <div class="field-head" data-toggle>
+        <span class="lab">Date de naissance et âge</span>
+        <span style="display:flex;align-items:center;gap:14px;"><span class="val empty">[ À REMPLIR ]</span><span class="field-chevron">&#9662;</span></span>
+      </div>
+      <div class="field-body"><div class="field-body-inner">Cette information n'a pas encore été renseignée. Elle sera complétée au fil de l'écriture de la fiche.</div></div>
+    </div>
+        <div class="field-row">
+      <div class="field-head" data-toggle>
+        <span class="lab">Genre</span>
+        <span style="display:flex;align-items:center;gap:14px;"><span class="val empty">[ À REMPLIR ]</span><span class="field-chevron">&#9662;</span></span>
+      </div>
+      <div class="field-body"><div class="field-body-inner">Cette information n'a pas encore été renseignée. Elle sera complétée au fil de l'écriture de la fiche.</div></div>
+    </div>
+        <div class="field-row">
+      <div class="field-head" data-toggle>
+        <span class="lab">Race (si non humain)</span>
+        <span style="display:flex;align-items:center;gap:14px;"><span class="val empty">[ À REMPLIR ]</span><span class="field-chevron">&#9662;</span></span>
+      </div>
+      <div class="field-body"><div class="field-body-inner">Cette information n'a pas encore été renseignée. Elle sera complétée au fil de l'écriture de la fiche.</div></div>
+    </div>
+        <div class="field-row">
+      <div class="field-head" data-toggle>
+        <span class="lab">Affiliation(s)</span>
+        <span style="display:flex;align-items:center;gap:14px;"><span class="val empty">[ À REMPLIR ]</span><span class="field-chevron">&#9662;</span></span>
+      </div>
+      <div class="field-body"><div class="field-body-inner">Cette information n'a pas encore été renseignée. Elle sera complétée au fil de l'écriture de la fiche.</div></div>
+    </div>
+        <div class="field-row">
+      <div class="field-head" data-toggle>
+        <span class="lab">Lieu de naissance</span>
+        <span style="display:flex;align-items:center;gap:14px;"><span class="val empty">[ À REMPLIR ]</span><span class="field-chevron">&#9662;</span></span>
+      </div>
+      <div class="field-body"><div class="field-body-inner">Cette information n'a pas encore été renseignée. Elle sera complétée au fil de l'écriture de la fiche.</div></div>
+    </div>
+        <div class="field-row">
+      <div class="field-head" data-toggle>
+        <span class="lab">Lieu de vie</span>
+        <span style="display:flex;align-items:center;gap:14px;"><span class="val empty">[ À REMPLIR ]</span><span class="field-chevron">&#9662;</span></span>
+      </div>
+      <div class="field-body"><div class="field-body-inner">Cette information n'a pas encore été renseignée. Elle sera complétée au fil de l'écriture de la fiche.</div></div>
+    </div>
+      </div>
+    </div>
+    <span class="important-badge">✦ Figure importante — Archonte Cryo</span>
+    <div class="prevnext">
+      <div class="pn-btn" data-goto="sommaire">&larr; Sommaire</div>
+      <div class="pn-btn home" data-goto="sommaire">&#9776; Sommaire</div>
+      <div class="pn-btn" data-goto="histoire">Histoire &rarr;</div>
+    </div>
+  </div>
+</section>
+
+
+<section class="page" id="page-histoire">
+  <div class="hero" style="background-image:url('assets/img/tsarine/palace_glacier.jpg')">
+      <div class="hero-caption">
+        <div class="chapter-num">CHAPITRE II</div>
+        <h2>Histoire</h2>
+        <div class="sub">Un passé encore scellé</div>
+      </div>
+    </div>
+  <div class="wrap">
+    <div class="empty-block">
+      <span class="tag">[ À REMPLIR ]</span>
+      <p><span class="dropcap">H</span>istoire de la Tsarine — enfance, ascension, événements marquants. Cette section attend encore d'être écrite.</p>
+    </div>
+    <div class="prevnext">
+      <div class="pn-btn" data-goto="identite">&larr; Identité</div>
+      <div class="pn-btn home" data-goto="sommaire">&#9776; Sommaire</div>
+      <div class="pn-btn" data-goto="mental">Mental &rarr;</div>
+    </div>
+  </div>
+</section>
+
+
+<section class="page" id="page-mental">
+  <div class="hero" style="background-image:url('assets/img/tsarine/eye_watch.jpg')">
+      <div class="hero-caption">
+        <div class="chapter-num">CHAPITRE III</div>
+        <h2>Mental</h2>
+        <div class="sub">L'âme derrière le voile</div>
+      </div>
+    </div>
+  <div class="wrap">
+    <div class="empty-block">
+      <span class="tag">[ À REMPLIR ]</span>
+      <p><span class="dropcap">M</span>entalité, caractère, perception du monde et des autres. Cette section attend encore d'être écrite.</p>
+    </div>
+    <div class="prevnext">
+      <div class="pn-btn" data-goto="histoire">&larr; Histoire</div>
+      <div class="pn-btn home" data-goto="sommaire">&#9776; Sommaire</div>
+      <div class="pn-btn" data-goto="combat">Combat &rarr;</div>
+    </div>
+  </div>
+</section>
+
+
+<section class="page" id="page-combat">
+  <div class="hero" style="background-image:url('assets/img/tsarine/blade_hand.jpg')">
+      <div class="hero-caption">
+        <div class="chapter-num">CHAPITRE IV</div>
+        <h2>Combat</h2>
+        <div class="sub">Le pouvoir de l'hiver</div>
+      </div>
+    </div>
+  <div class="wrap">
+    <div class="combat-grid">
+      <div class="combat-card" data-toggle>
+      <div class="cc-img" style="background-image:url('assets/img/tsarine/sigil_diamond.jpg')"><span class="cc-icon">❄</span></div>
+      <div class="cc-body">
+        <h4>Élément</h4>
+        <div class="cc-val">[ À REMPLIR ]</div>
+        <div class="combat-detail"><div class="combat-detail-inner">À compléter — cette section sera détaillée ultérieurement.</div></div>
+      </div>
+    </div>
+      <div class="combat-card" data-toggle>
+      <div class="cc-img" style="background-image:url('assets/img/tsarine/blade_hand.jpg')"><span class="cc-icon">⚔</span></div>
+      <div class="cc-body">
+        <h4>Arme(s)</h4>
+        <div class="cc-val">[ À REMPLIR ]</div>
+        <div class="combat-detail"><div class="combat-detail-inner">À compléter — cette section sera détaillée ultérieurement.</div></div>
+      </div>
+    </div>
+      <div class="combat-card" data-toggle>
+      <div class="cc-img" style="background-image:url('assets/img/tsarine/star_swirl.jpg')"><span class="cc-icon">✦</span></div>
+      <div class="cc-body">
+        <h4>Compétences</h4>
+        <div class="cc-val">[ À REMPLIR ]</div>
+        <div class="combat-detail"><div class="combat-detail-inner">À compléter — cette section sera détaillée ultérieurement.</div></div>
+      </div>
+    </div>
+      <div class="combat-card" data-toggle>
+      <div class="cc-img" style="background-image:url('assets/img/tsarine/sigil_crest.jpg')"><span class="cc-icon">☆</span></div>
+      <div class="cc-body">
+        <h4>Constellation</h4>
+        <div class="cc-val">[ À REMPLIR ]</div>
+        <div class="combat-detail"><div class="combat-detail-inner">À compléter — cette section sera détaillée ultérieurement.</div></div>
+      </div>
+    </div>
+    </div>
+    <div class="prevnext">
+      <div class="pn-btn" data-goto="mental">&larr; Mental</div>
+      <div class="pn-btn home" data-goto="sommaire">&#9776; Sommaire</div>
+      <div class="pn-btn" data-goto="physique">Physique &rarr;</div>
+    </div>
+  </div>
+</section>
+
+
+<section class="page" id="page-physique">
+  <div class="hero" style="background-image:url('assets/img/tsarine/veil_close2.jpg')">
+      <div class="hero-caption">
+        <div class="chapter-num">CHAPITRE V</div>
+        <h2>Physique</h2>
+        <div class="sub">Références visuelles</div>
+      </div>
+    </div>
+  <div class="wrap">
+    <h3 style="margin-bottom:6px;">Référence(s)</h3>
+    <p class="serif-i" style="color:var(--ink-dim);margin-top:0;">Moodboard visuel rassemblé pour guider son apparence — cliquer sur une image pour l'agrandir.</p>
+    <div class="gallery"><figure data-lightbox="assets/img/tsarine/veil_close1.jpg"><img src="assets/img/tsarine/veil_close1.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/veil_close2.jpg"><img src="assets/img/tsarine/veil_close2.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/veil_close3.jpg"><img src="assets/img/tsarine/veil_close3.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/veil_close4.jpg"><img src="assets/img/tsarine/veil_close4.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/veil_diamond_art.jpg"><img src="assets/img/tsarine/veil_diamond_art.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/veil_diamond_ref.jpg"><img src="assets/img/tsarine/veil_diamond_ref.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/veil_silhouette_snow.jpg"><img src="assets/img/tsarine/veil_silhouette_snow.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/veil_sketch.jpg"><img src="assets/img/tsarine/veil_sketch.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/hair_pale.jpg"><img src="assets/img/tsarine/hair_pale.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/gown_shoulders.jpg"><img src="assets/img/tsarine/gown_shoulders.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/jewelry_earrings.jpg"><img src="assets/img/tsarine/jewelry_earrings.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/sigil_diamond.jpg"><img src="assets/img/tsarine/sigil_diamond.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/crown_motif.jpg"><img src="assets/img/tsarine/crown_motif.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/frost_grip.jpg"><img src="assets/img/tsarine/frost_grip.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/namecard_bg1.jpg"><img src="assets/img/tsarine/namecard_bg1.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/namecard_bg2.jpg"><img src="assets/img/tsarine/namecard_bg2.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/tsaritsa_sketch_group.jpg"><img src="assets/img/tsarine/tsaritsa_sketch_group.jpg" loading="lazy" alt=""/></figure>
+<figure data-lightbox="assets/img/tsarine/throne_heart.jpg"><img src="assets/img/tsarine/throne_heart.jpg" loading="lazy" alt=""/></figure></div>
+    <div class="divider"><span class="ln"></span><span class="gl">❆</span><span class="ln"></span></div>
+    <h3>Description</h3>
+    <div class="empty-block" style="padding:40px;">
+      <span class="tag">[ À REMPLIR ]</span>
+      <p>Description écrite de son apparence physique.</p>
+    </div>
+    <div class="prevnext">
+      <div class="pn-btn" data-goto="combat">&larr; Combat</div>
+      <div class="pn-btn home" data-goto="sommaire">&#9776; Sommaire</div>
+      <div class="pn-btn" data-goto="liens">Liens &rarr;</div>
+    </div>
+  </div>
+</section>
+
+
+<section class="page" id="page-liens">
+  <div class="hero" style="background-image:url('assets/img/tsarine/court_figures_gembattle.jpg')">
+      <div class="hero-caption">
+        <div class="chapter-num">CHAPITRE VI</div>
+        <h2>Liens</h2>
+        <div class="sub">OC &amp; PNJ</div>
+      </div>
+    </div>
+  <div class="wrap">
+    <div class="tree-wrap">
+      <div class="tree-col">
+        <h4>OC</h4>
+        <div class="tree-node">?<span class="tt">à lier</span></div><div class="tree-node">?<span class="tt">à lier</span></div>
+      </div>
+      <div class="tree-col">
+        <h4>PNJ / Famille</h4>
+        <div class="tree-node">?<span class="tt">à lier</span></div><div class="tree-node">?<span class="tt">à lier</span></div><div class="tree-node">?<span class="tt">à lier</span></div>
+      </div>
+    </div>
+    <p style="text-align:center;color:var(--ink-dim);font-style:italic;">Aucun lien n'a encore été établi.</p>
+    <div class="prevnext">
+      <div class="pn-btn" data-goto="physique">&larr; Physique</div>
+      <div class="pn-btn home" data-goto="sommaire">&#9776; Sommaire</div>
+      <div class="pn-btn" data-goto="role">Rôle & Réputation &rarr;</div>
+    </div>
+  </div>
+</section>
+
+
+<section class="page" id="page-role">
+  <div class="hero" style="background-image:url('assets/img/tsarine/throne_heart.jpg')">
+      <div class="hero-caption">
+        <div class="chapter-num">CHAPITRE VII</div>
+        <h2>Rôle &amp; Réputation</h2>
+        <div class="sub">La Tsarine aux yeux du monde</div>
+      </div>
+    </div>
+  <div class="wrap">
+    <h3>Son rôle</h3>
+    <div class="empty-block" style="padding:40px;margin-bottom:24px;"><span class="tag">[ À REMPLIR ]</span><p>Fonction exacte, gouvernance quotidienne de la nation.</p></div>
+    <h3>Réputation</h3>
+    <div class="empty-block" style="padding:40px;margin-bottom:24px;"><span class="tag">[ À REMPLIR ]</span><p>Perception publique, à l'intérieur comme à l'extérieur de Snezhnaya.</p></div>
+    <h3>Légendes</h3>
+    <div class="empty-block" style="padding:40px;"><span class="tag">[ À REMPLIR ]</span><p>Anecdotes, hauts-faits ou récits qui circulent à son sujet.</p></div>
+    <div class="prevnext">
+      <div class="pn-btn" data-goto="liens">&larr; Liens</div>
+      <div class="pn-btn home" data-goto="sommaire">&#9776; Sommaire</div>
+      <div class="pn-btn" data-goto="sommaire">Sommaire &rarr;</div>
+    </div>
+  </div>
+</section>
+
+  </main>
+</div>
+
+<script>
+
+// ---------- ambient snow ----------
+const bgCanvas = document.getElementById('snowbg');
+const bgCtx = bgCanvas.getContext('2d');
+let W,H;
+function resize(){ W = bgCanvas.width = window.innerWidth; H = bgCanvas.height = window.innerHeight;
+  const bc = document.getElementById('burstfx'); bc.width = window.innerWidth; bc.height = window.innerHeight; }
+window.addEventListener('resize', resize); resize();
+let flakes = [];
+for(let i=0;i<60;i++){ flakes.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*2+0.5,s:Math.random()*0.5+0.15,d:Math.random()*1-0.5}); }
+function drawSnow(){
+  bgCtx.clearRect(0,0,W,H);
+  bgCtx.fillStyle='rgba(230,238,245,0.5)';
+  for(const f of flakes){
+    bgCtx.beginPath(); bgCtx.arc(f.x,f.y,f.r,0,Math.PI*2); bgCtx.fill();
+    f.y+=f.s; f.x+=f.d*0.3;
+    if(f.y>H){f.y=-5; f.x=Math.random()*W;}
+    if(f.x>W) f.x=0; if(f.x<0) f.x=W;
+  }
+  requestAnimationFrame(drawSnow);
+}
+drawSnow();
+
+// ---------- burst transition fx ----------
+const burstCanvas = document.getElementById('burstfx');
+const burstCtx = burstCanvas.getContext('2d');
+let burstParticles = [];
+function spawnBurst(){
+  burstParticles = [];
+  for(let i=0;i<120;i++){
+    const angle = Math.random()*Math.PI*2, speed = Math.random()*4+1;
+    burstParticles.push({x:window.innerWidth/2,y:window.innerHeight/2,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-1,r:Math.random()*2.2+0.7,life:1,
+      col: Math.random()<0.5 ? '200,173,120' : '143,224,232'});
+  }
+}
+let burstRunning=false;
+function runBurst(){
+  burstCtx.clearRect(0,0,burstCanvas.width,burstCanvas.height);
+  let alive=false;
+  for(const p of burstParticles){
+    if(p.life<=0) continue; alive=true;
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.01; p.life-=0.012;
+    burstCtx.globalAlpha=Math.max(p.life,0);
+    burstCtx.fillStyle=`rgba(${p.col},1)`;
+    burstCtx.beginPath(); burstCtx.arc(p.x,p.y,p.r,0,Math.PI*2); burstCtx.fill();
+  }
+  burstCtx.globalAlpha=1;
+  if(alive) requestAnimationFrame(runBurst);
+  else { burstRunning=false; burstCtx.clearRect(0,0,burstCanvas.width,burstCanvas.height); }
+}
+
+// ---------- page navigation ----------
+let current = 'sommaire';
+function setActiveTab(id){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.goto === id));
+}
+function goToPage(id){
+  if(id === current) return;
+  const curEl = document.getElementById('page-'+current);
+  const nextEl = document.getElementById('page-'+id);
+  if(!nextEl) return;
+  document.getElementById('lightbox').classList.remove('show');
+  if(!burstRunning){ burstRunning=true; spawnBurst(); runBurst(); } else { spawnBurst(); }
+  curEl.classList.remove('active');
+  nextEl.classList.add('active');
+  current = id;
+  setActiveTab(id);
+  window.scrollTo(0,0);
+  document.getElementById('tabnav').classList.remove('open');
+}
+document.querySelectorAll('[data-goto]').forEach(el=>{
+  el.addEventListener('click', ()=> goToPage(el.dataset.goto));
+});
+
+document.getElementById('navtoggle').addEventListener('click', ()=>{
+  document.getElementById('tabnav').classList.toggle('open');
+});
+
+// ---------- accordion fields & combat cards ----------
+document.querySelectorAll('.field-head[data-toggle]').forEach(head=>{
+  head.addEventListener('click', ()=> head.parentElement.classList.toggle('open'));
+});
+document.querySelectorAll('.combat-card[data-toggle]').forEach(card=>{
+  card.addEventListener('click', ()=> card.classList.toggle('open'));
+});
+
+// ---------- lightbox gallery ----------
+const lb = document.getElementById('lightbox');
+const lbImg = document.getElementById('lb-img');
+let galleryList = [];
+let galleryIdx = 0;
+function refreshGalleryList(){
+  galleryList = Array.from(document.querySelectorAll('[data-lightbox]')).map(el => el.dataset.lightbox);
+}
+function openLightbox(src){
+  refreshGalleryList();
+  galleryIdx = galleryList.indexOf(src);
+  lbImg.src = src;
+  lb.classList.add('show');
+}
+document.querySelectorAll('[data-lightbox]').forEach(el=>{
+  el.addEventListener('click', ()=> openLightbox(el.dataset.lightbox));
+});
+document.querySelector('.lb-close').addEventListener('click', ()=> lb.classList.remove('show'));
+lb.addEventListener('click', (e)=>{ if(e.target === lb) lb.classList.remove('show'); });
+document.querySelector('.lb-prev').addEventListener('click', (e)=>{ e.stopPropagation();
+  galleryIdx = (galleryIdx - 1 + galleryList.length) % galleryList.length; lbImg.src = galleryList[galleryIdx]; });
+document.querySelector('.lb-next').addEventListener('click', (e)=>{ e.stopPropagation();
+  galleryIdx = (galleryIdx + 1) % galleryList.length; lbImg.src = galleryList[galleryIdx]; });
+document.addEventListener('keydown', (e)=>{
+  if(!lb.classList.contains('show')) return;
+  if(e.key === 'Escape') lb.classList.remove('show');
+  if(e.key === 'ArrowLeft') document.querySelector('.lb-prev').click();
+  if(e.key === 'ArrowRight') document.querySelector('.lb-next').click();
+});
+
+// ---------- audio ----------
+const audioEl = document.getElementById('theme-audio');
+const audioBtn = document.getElementById('audio-toggle');
+const eqBars = document.querySelectorAll('#audio-ctrl .eq span');
+let isPlaying = false;
+function setEq(playing){
+  eqBars.forEach(b => { b.style.animationPlayState = playing ? 'running' : 'paused'; });
+}
+function eqTick(){
+  if(isPlaying){ eqBars.forEach(b => { b.style.height = (4+Math.random()*14)+'px'; }); }
+  requestAnimationFrame(eqTick);
+}
+eqTick();
+function playAudio(){
+  audioEl.volume = 0.55;
+  audioEl.play().then(()=>{ isPlaying = true; audioBtn.innerHTML = '&#10074;&#10074;'; }).catch(()=>{
+    isPlaying = false; audioBtn.innerHTML = '&#9658;';
+  });
+}
+audioBtn.addEventListener('click', ()=>{
+  if(isPlaying){ audioEl.pause(); isPlaying=false; audioBtn.innerHTML='&#9658;'; }
+  else { playAudio(); }
+});
+
+// ---------- cover ----------
+document.getElementById('enter-btn').addEventListener('click', ()=>{
+  document.getElementById('cover').classList.add('hidden');
+  playAudio();
+  spawnBurst(); if(!burstRunning){burstRunning=true; runBurst();}
+});
+
+</script>
+<style>
+@keyframes eqbar { 0%,100% { height:4px; } 50% { height:16px; } }
+</style>
+</body>
+</html>
